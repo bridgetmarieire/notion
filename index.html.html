@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lined Notes Whiteboard</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+        background: repeating-linear-gradient(
+          to bottom,
+          #ffffff,
+          #ffffff 38px,
+          #e0e0e0 39px,
+          #ffffff 40px
+        );
+        touch-action: none;
+        cursor: crosshair;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="noteCanvas"></canvas>
+
+    <script>
+      const canvas = document.getElementById("noteCanvas");
+      const ctx = canvas.getContext("2d");
+
+      let drawing = false;
+      let lastX = 0;
+      let lastY = 0;
+
+      // Resize canvas to full window
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        drawLines();
+      }
+
+      function drawLines() {
+        const spacing = 40;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        for (let y = spacing; y < canvas.height; y += spacing) {
+          ctx.moveTo(0, y);
+          ctx.lineTo(canvas.width, y);
+        }
+        ctx.strokeStyle = "#e0e0e0";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      function draw(e) {
+        if (!drawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX || e.touches[0].clientX;
+        const y = e.clientY || e.touches[0].clientY;
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.stroke();
+        lastX = x;
+        lastY = y;
+      }
+
+      canvas.addEventListener("mousedown", (e) => {
+        drawing = true;
+        lastX = e.clientX;
+        lastY = e.clientY;
+      });
+
+      canvas.addEventListener("touchstart", (e) => {
+        drawing = true;
+        lastX = e.touches[0].clientX;
+        lastY = e.touches[0].clientY;
+      });
+
+      canvas.addEventListener("mousemove", draw);
+      canvas.addEventListener("touchmove", draw);
+
+      canvas.addEventListener("mouseup", () => (drawing = false));
+      canvas.addEventListener("mouseout", () => (drawing = false));
+      canvas.addEventListener("touchend", () => (drawing = false));
+      canvas.addEventListener("touchcancel", () => (drawing = false));
+
+      window.addEventListener("resize", () => {
+        resizeCanvas();
+      });
+
+      resizeCanvas();
+    </script>
+  </body>
+</html>
